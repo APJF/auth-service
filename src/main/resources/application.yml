@@ -31,7 +31,7 @@ spring:
         registration:
           google:
             client-id: 271591068969-cndqnccrg1a4k805kcupig817lhmq3r9.apps.googleusercontent.com
-            client-secret: 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
+            client-secret: dit me may
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
