@@ -9,6 +9,4 @@ public class JlsfApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(JlsfApplication.class, args);
 	}
-		int a=0;
-	int b=0;
 }
