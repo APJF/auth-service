@@ -10,4 +10,5 @@ public class JlsfApplication {
 		SpringApplication.run(JlsfApplication.class, args);
 	}
 		int a=0;
+	int b=0;
 }
