@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  mysql:
+    container_name: mysql-container
+    image: 'mysql:latest'
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "3306:3306"
+
+  ollama:
+    container_name: ollama-container
+    image: 'ollama/ollama:latest'
+    env_file:
+      - .env
+    ports:
+      - "11434:11434"
