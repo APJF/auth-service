@@ -27,6 +27,7 @@ public class AuthController {
 //        userService.register(registerDTO);
 //        return ResponseEntity.status(HttpStatus.CREATED)
 //                .body(new ApiResponseDTO(true, "User registered. Please verify with OTP."));
+
                 try {
                     userService.register(registerDTO);   // vẫn gọi service void
                     return ResponseEntity
