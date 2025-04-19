@@ -16,7 +16,7 @@ on:
 jobs:
   build:
     env:
-      SPRING_PROFILES_ACTIVE: test
+
       # GitHub Secrets
       DB_URL: ${{ secrets.DB_URL }}
       MYSQL_USER: ${{ secrets.MYSQL_USER }}
