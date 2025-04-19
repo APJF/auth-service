@@ -16,7 +16,8 @@ on:
 jobs:
   build:
     env:
-      # Nếu đã lưu trong GitHub Secrets
+      SPRING_PROFILES_ACTIVE: test
+      # GitHub Secrets
       DB_URL: ${{ secrets.DB_URL }}
       MYSQL_USER: ${{ secrets.MYSQL_USER }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
