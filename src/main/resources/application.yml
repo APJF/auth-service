@@ -2,7 +2,7 @@ spring:
   application:
     name: capstone
   profiles:
-    active: dev
+    active: default
   datasource:
     url: ${DB_URL}
     username: ${MYSQL_USER}
