@@ -15,7 +15,7 @@ public interface UserService {
 
     void forgotPassword(String email);
 
-    void resetPassword(String email, String newPassword);
+    void resetPassword(String email, String otp, String newPassword);
 
     Optional<User> findByUsername(String username);
 

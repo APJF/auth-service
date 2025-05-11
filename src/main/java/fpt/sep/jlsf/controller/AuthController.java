@@ -5,6 +5,7 @@ import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,42 +16,36 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponseDTO register(@RequestBody RegisterDTO registerDTO) {
+    public ResponseEntity<ApiResponseDTO> register(@RequestBody RegisterDTO registerDTO) {
         userService.register(registerDTO);
-        return new ApiResponseDTO(true, "User registered. Please verify with OTP.");
+        ApiResponseDTO response = new ApiResponseDTO(true, "User registered. Please verify with OTP.");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/verify")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponseDTO verifyAccount(@RequestParam String email,
-                                        @RequestParam String otp) {
+    public ResponseEntity<ApiResponseDTO> verifyAccount(@RequestParam String email, @RequestParam String otp) {
         userService.verifyAccount(email, otp);
-        return new ApiResponseDTO(true, "Account verified successfully.");
+        return new ResponseEntity<>(new ApiResponseDTO(true, "Account verified successfully"), HttpStatus.OK);
     }
 
     @PostMapping("/{email}/otp")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponseDTO regenerateOtp(@PathVariable String email) {
+    public ResponseEntity<ApiResponseDTO> regenerateOtp(@PathVariable String email) {
         userService.regenerateOtp(email);
-        return new ApiResponseDTO(true, "OTP regenerated successfully.");
+        return new ResponseEntity<>(new ApiResponseDTO(true, "OTP regenerated successfully"), HttpStatus.OK);
     }
 
     @PostMapping("/forgot-password")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponseDTO forgotPassword(@RequestParam String email) {
+    public ResponseEntity<ApiResponseDTO> forgotPassword(@RequestParam String email) {
         userService.forgotPassword(email);
-        return new ApiResponseDTO(true, "Verification email sent.");
+        return new ResponseEntity<>(new ApiResponseDTO(true, "Verification email sent"), HttpStatus.OK);
     }
 
     @PostMapping("/reset-password")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponseDTO resetPassword(
+    public ResponseEntity<ApiResponseDTO> resetPassword(
             @RequestParam String email,
-            @RequestParam String newPassword
-    ) {
-        userService.resetPassword(email, newPassword);
-        return new ApiResponseDTO(true, "Password reset successfully.");
+            @RequestParam String otp,
+            @RequestParam String newPassword) {
+        userService.resetPassword(email, otp, newPassword);
+        return new ResponseEntity<>(new ApiResponseDTO(true, "Password reset successfully"), HttpStatus.OK);
     }
-
 }

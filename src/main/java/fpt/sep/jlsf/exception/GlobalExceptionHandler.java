@@ -14,27 +14,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseDTO> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
                 .badRequest()
-                .body(new ApiResponseDTO(false, ex.getMessage()));
+                .body(new ApiResponseDTO(false, ex.getMessage(), "INVALID_INPUT", null));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiResponseDTO> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponseDTO(false, ex.getMessage()));
+                .body(new ApiResponseDTO(false, ex.getMessage(), "NOT_FOUND", null));
     }
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiResponseDTO> handleAppException(AppException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponseDTO(false, ex.getMessage()));
+                .body(new ApiResponseDTO(false, ex.getMessage(), "APP_ERROR", null));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDTO> handleGenericException(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponseDTO(false, "Internal Server Error: " + ex.getMessage()));
+                .body(new ApiResponseDTO(false, "Internal Server Error: " + ex.getMessage(), "INTERNAL_ERROR", null));
     }
 }
