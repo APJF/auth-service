@@ -1,15 +1,14 @@
 spring:
   application:
     name: capstone
-  profiles:
-    active: default
+
   datasource:
     url: ${DB_URL}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
   mail:
     host: smtp.gmail.com

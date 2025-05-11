@@ -1,23 +1,24 @@
 package fpt.sep.jlsf.service;
 
-import fpt.sep.jlsf.dto.LoginDTO;
 import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.entity.User;
+import fpt.sep.jlsf.entity.VerifyToken;
+import fpt.sep.jlsf.entity.VerifyToken.VerifyTokenType;
 import fpt.sep.jlsf.exception.AppException;
 import fpt.sep.jlsf.repository.UserRepository;
+import fpt.sep.jlsf.repository.VerifyTokenRepository;
 import fpt.sep.jlsf.util.EmailUtil;
 import fpt.sep.jlsf.util.OtpUtil;
-import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,103 +28,119 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final VerifyTokenRepository verifyTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final OtpUtil otpUtil;
     private final EmailUtil emailUtil;
 
-    @Override
-    public void register(RegisterDTO registerDTO) {
-        String otp = otpUtil.generateOTP();
-        try {
-            emailUtil.sendOtpEmail(registerDTO.email(), otp);
-        } catch (Exception e) {
-            log.error("Error sending email: {}", e.getMessage());
-            throw new AppException("Error sending email OTP", e);
+    private static final Duration OTP_TTL = Duration.ofMinutes(10);
+    private static final Duration OTP_THROTTLE = Duration.ofMinutes(1);
 
+    @Override
+    @Transactional
+    public void register(RegisterDTO registerDTO) {
+        if (userRepository.existsByEmail(registerDTO.email())) {
+            throw new IllegalArgumentException("Email đã tồn tại.");
         }
+        if (userRepository.existsByUsername(registerDTO.username())) {
+            throw new IllegalArgumentException("Username đã tồn tại.");
+        }
+
         User user = new User();
         user.setUsername(registerDTO.username());
         user.setPassword(passwordEncoder.encode(registerDTO.password()));
         user.setEmail(registerDTO.email());
-        user.setOtp(otp);
         user.setAvatar("https://engineering.usask.ca/images/no_avatar.jpg");
-        user.setExpirationTime(LocalDateTime.now());
-        //set status false
         user.setEnabled(false);
         userRepository.save(user);
+
+        createAndSendToken(user, VerifyTokenType.REGISTRATION);
     }
 
     @Override
+    @Transactional
     public void verifyAccount(String email, String otp) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException("Email not found: " + email));
-        long secondsElapsed = Duration.between(user.getExpirationTime(), LocalDateTime.now()).getSeconds();
-        if (!user.getOtp().equals(otp) || secondsElapsed > 300) {
-            throw new AppException("OTP incorrect or expired. Please regenerate OTP and try again.");
+                .orElseThrow(() -> new AppException("Email không tồn tại."));
+        VerifyToken token = verifyTokenRepository
+                .findTopByUserAndTypeOrderByRequestedTimeDesc(user, VerifyTokenType.REGISTRATION)
+                .orElseThrow(() -> new AppException("OTP không tồn tại."));
+
+        if (token.getExpirationTime().isBefore(LocalDateTime.now()) || !token.getToken().equals(otp)) {
+            throw new AppException("OTP sai hoặc đã hết hạn.");
         }
+
         user.setEnabled(true);
         userRepository.save(user);
+        verifyTokenRepository.delete(token);
     }
 
     @Override
+    @Transactional
     public void regenerateOtp(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException("User not found: " + email));
-        String otp = otpUtil.generateOTP();
-        try {
-            emailUtil.sendOtpEmail(email, otp);
-        } catch (MessagingException e) {
-            throw new AppException("Error sending email OTP", e);
-        }
-        user.setOtp(otp);
-        user.setExpirationTime(LocalDateTime.now());
-        userRepository.save(user);
-    }
+                .orElseThrow(() -> new AppException("User không tồn tại."));
+        VerifyToken token = verifyTokenRepository
+                .findTopByUserAndTypeOrderByRequestedTimeDesc(user, VerifyTokenType.REGISTRATION)
+                .orElseThrow(() -> new AppException("Chưa có OTP trước đó."));
 
-    public String login(LoginDTO loginDTO) {
-        User user = userRepository.findByEmail(loginDTO.email())
-                .orElseThrow(() -> new AppException("User not found: " + loginDTO.email()));
-        if (!passwordEncoder.matches(loginDTO.password(), user.getPassword())) {
-            return "Login failed";
-        } else if (!user.isEnabled()) {
-            return "Account not verified";
+        if (Duration.between(token.getRequestedTime(), LocalDateTime.now()).compareTo(OTP_THROTTLE) < 0) {
+            throw new AppException("Vui lòng chờ ít nhất 1 phút trước khi yêu cầu gửi lại OTP.");
         }
-        return "Login successful";
+
+        verifyTokenRepository.delete(token);
+        createAndSendToken(user, VerifyTokenType.REGISTRATION);
     }
 
     @Override
+    @Transactional
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException("User not found: " + email));
-        String otp = otpUtil.generateOTP();
-        user.setExpirationTime(LocalDateTime.now());
-        try {
-            user.setOtp(otp);
-            emailUtil.sendSetPassword(email, otp);
-            userRepository.save(user);
-        } catch (MessagingException e) {
-            throw new AppException("Error sending email OTP", e);
+                .orElseThrow(() -> new AppException("User không tồn tại."));
+        verifyTokenRepository.deleteAllByUserAndType(user, VerifyTokenType.RESET_PASSWORD);
+        createAndSendToken(user, VerifyTokenType.RESET_PASSWORD);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String email, String otp, String newPassword) {
+        User user = findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        VerifyToken token = verifyTokenRepository.findTopByUserAndTypeOrderByRequestedTimeDesc(user, VerifyTokenType.RESET_PASSWORD)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+
+        if (!otpUtil.validateOTP(token.getToken(), otp)) {
+            throw new IllegalArgumentException("Invalid OTP");
         }
-    }
 
-    @Override
-    public void resetPassword(String email, String newPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException("User not found: " + email));
-        user.setEnabled(true);
+        if (token.getExpirationTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("OTP expired");
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        save(user);
+
+        // Vô hiệu hóa tất cả các token reset password của user này
+        verifyTokenRepository.deleteAllByUserAndType(user, VerifyTokenType.RESET_PASSWORD);
+    }
+
+    private void createAndSendToken(User user, VerifyTokenType type) {
+        verifyTokenRepository.deleteAllByUserAndType(user, type);
+        LocalDateTime now = LocalDateTime.now();
+        String otp = otpUtil.generateOTP();
+        VerifyToken token = VerifyToken.builder()
+                .user(user)
+                .token(otp)
+                .type(type)
+                .requestedTime(now)
+                .expirationTime(now.plus(OTP_TTL))
+                .build();
+        verifyTokenRepository.save(token);
+        emailUtil.sendEmailAsync(user.getEmail(), otp, type);
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new AppException("User not found with id: " + id));
-    }
-
-    @Override
-    public Optional<User> findByUsername(String name) {
-        return userRepository.findByUsername(name);
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override
@@ -134,43 +151,5 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         return userRepository.save(user);
-    }
-
-    @Transactional
-    public void updateUser(User updatedUser) {
-        User existingUser = userRepository.findById(updatedUser.getId())
-                .orElseThrow(() -> new AppException("User not found with id: " + updatedUser.getId()));
-        existingUser.setUsername(updatedUser.getUsername());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPhone(updatedUser.getPhone());
-        existingUser.setAddress(updatedUser.getAddress());
-        existingUser.setAvatar(updatedUser.getAvatar());
-        userRepository.save(existingUser);
-    }
-
-    public boolean checkPassword(String username, String rawPassword) {
-        return findByUsername(username)
-                .map(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
-                .orElse(false);
-    }
-
-    public void changePassword(String username, String newPassword) {
-        User user = findByUsername(username)
-                .orElseThrow(() -> new AppException("User not found: " + username));
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-    }
-
-    @Override
-    public List<User> searchUsers(String role, String email) {
-        if ((role == null || role.isEmpty()) && (email == null || email.isEmpty())) {
-            return userRepository.findAll();
-        } else if (role != null && !role.isEmpty() && (email == null || email.isEmpty())) {
-            return userRepository.findByAuthorities_Authority(role);
-        } else if (role == null || role.isEmpty()) {
-            return userRepository.findByEmailContaining(email);
-        } else {
-            return userRepository.findByAuthorities_AuthorityAndEmailContaining(role, email);
-        }
     }
 }

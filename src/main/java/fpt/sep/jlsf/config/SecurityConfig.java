@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 👈 Bỏ hết ràng buộc, cho phép toàn bộ để test
+                        .anyRequest().permitAll() // Allow all requests
                 );
 
         return http.build();

@@ -2,16 +2,17 @@ package fpt.sep.jlsf.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "authority")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-
+@Getter
+@Setter
 public class Authority implements GrantedAuthority {
 
     @Id

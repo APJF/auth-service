@@ -1,22 +1,22 @@
 package fpt.sep.jlsf.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@ToString(exclude = {"authorities"})
+@Getter
+@Setter
 public class User implements UserDetails {
 
     @Id
@@ -26,7 +26,7 @@ public class User implements UserDetails {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "password", unique = true, nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
@@ -50,16 +50,31 @@ public class User implements UserDetails {
     @Column(name = "email_verified")
     private boolean emailVerified = true;
 
-    @Column(name = "otp")
-    private String otp;
-
-    @Column(name = "expiration_time")
-    private LocalDateTime expirationTime;
-
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnore
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
     private List<Authority> authorities;
+
+    // UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
 }
 
 

@@ -22,9 +22,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -43,6 +45,7 @@ tasks.named('test') {
 }
 
 test {
+    systemProperty "spring.profiles.active", "test"
     jvmArgs += ["--add-opens", "java.base/java.lang=ALL-UNNAMED"]
     jvmArgs += ["-Djdk.instrument.traceUsage"]
 }

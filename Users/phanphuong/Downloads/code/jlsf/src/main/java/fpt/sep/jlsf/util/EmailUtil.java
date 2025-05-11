@@ -1,6 +1,6 @@
 package fpt.sep.jlsf.util;
 
-import fpt.sep.jlsf.entity.VerifyToken;
+import fpt.sep.jlsf.entity.VerifyToken.VerifyTokenType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +41,26 @@ public class EmailUtil {
                 </html>
                 """, verifyLink, otp);
     }
+    
 
+    public void sendOtpEmail(String email, String otp) throws MessagingException {
+        String linkTemplate = "http://localhost:8080/auth/verify-account?email=%s&otp=%s";
+        sendEmail(email, "Email Verification", getHtmlContent(email, otp, linkTemplate));
+    }
+
+    public void sendSetPassword(String email, String otp) throws MessagingException {
+        String linkTemplate = "http://localhost:8080/auth/reset-password?email=%s&otp=%s";
+        sendEmail(email, "Reset Password", getHtmlContent(email, otp, linkTemplate));
+    }
+    
+    /**
+     * Gửi email bất đồng bộ dựa trên loại token
+     * @param email Địa chỉ email của người nhận
+     * @param otp Mã OTP
+     * @param type Loại token xác thực
+     */
     @Async("taskExecutor")
-    public void sendEmailAsync(String email, String otp, VerifyToken.VerifyTokenType type) {
+    public void sendEmailAsync(String email, String otp, VerifyTokenType type) {
         try {
             switch (type) {
                 case REGISTRATION:
@@ -61,15 +78,5 @@ public class EmailUtil {
         } catch (Exception e) {
             log.error("Error sending {} email: {}", type, e.getMessage(), e);
         }
-    }
-
-    public void sendOtpEmail(String email, String otp) throws MessagingException {
-        String linkTemplate = "http://localhost:8080/auth/verify-account?email=%s&otp=%s";
-        sendEmail(email, "Email Verification", getHtmlContent(email, otp, linkTemplate));
-    }
-
-    public void sendSetPassword(String email, String otp) throws MessagingException {
-        String linkTemplate = "http://localhost:8080/auth/reset-password?email=%s&otp=%s";
-        sendEmail(email, "Reset Password", getHtmlContent(email, otp, linkTemplate));
     }
 }
