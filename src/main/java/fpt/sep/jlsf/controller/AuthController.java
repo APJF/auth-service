@@ -3,6 +3,7 @@ package fpt.sep.jlsf.controller;
 import fpt.sep.jlsf.dto.ApiResponseDTO;
 import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +16,8 @@ public class AuthController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponseDTO> register(@RequestBody RegisterDTO registerDTO) {
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponseDTO> register(@Valid @RequestBody RegisterDTO registerDTO) {
         userService.register(registerDTO);
         ApiResponseDTO response = new ApiResponseDTO(true, "User registered. Please verify with OTP.");
         return new ResponseEntity<>(response, HttpStatus.CREATED);

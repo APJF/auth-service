@@ -5,9 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record RegisterDTO(
-        @NotBlank @Size(min = 3, max = 20) String username,
-        @NotBlank @Email String email,
-        @NotBlank @Size(min = 6) String password
+        @NotBlank(message = "Username cannot left blank")
+        @Size(min = 4, message = "username must be at least 4 character")
+        String username,
+
+        @NotBlank(message = "Email cannot left blank")
+        @Email(message = "Wrong email format")
+        String email,
+
+        @NotBlank(message = "Password cannot left blank")
+        @Size(min = 6, message = "password must be at least 6 character")
+        String password
 ) {
 }
 

@@ -1,4 +1,4 @@
-package fpt.sep.jlsf.service;
+package fpt.sep.jlsf.service.impl;
 
 import fpt.sep.jlsf.entity.Authority;
 import fpt.sep.jlsf.entity.User;

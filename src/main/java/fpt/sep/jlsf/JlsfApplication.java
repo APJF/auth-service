@@ -10,5 +10,4 @@ public class JlsfApplication {
         SpringApplication.run(JlsfApplication.class, args);
         System.out.println("Build Successful :DD");
     }
-
 }

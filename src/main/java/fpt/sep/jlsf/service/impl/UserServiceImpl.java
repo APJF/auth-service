@@ -1,4 +1,4 @@
-package fpt.sep.jlsf.service;
+package fpt.sep.jlsf.service.impl;
 
 import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.entity.User;
@@ -7,6 +7,7 @@ import fpt.sep.jlsf.entity.VerifyToken.VerifyTokenType;
 import fpt.sep.jlsf.exception.AppException;
 import fpt.sep.jlsf.repository.UserRepository;
 import fpt.sep.jlsf.repository.VerifyTokenRepository;
+import fpt.sep.jlsf.service.UserService;
 import fpt.sep.jlsf.util.EmailUtil;
 import fpt.sep.jlsf.util.OtpUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -97,7 +98,6 @@ public class UserServiceImpl implements UserService {
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException("User không tồn tại."));
-        verifyTokenRepository.deleteAllByUserAndType(user, VerifyTokenType.RESET_PASSWORD);
         createAndSendToken(user, VerifyTokenType.RESET_PASSWORD);
     }
 

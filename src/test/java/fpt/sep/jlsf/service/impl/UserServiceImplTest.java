@@ -5,7 +5,6 @@ import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.entity.User;
 import fpt.sep.jlsf.exception.AppException;
 import fpt.sep.jlsf.repository.UserRepository;
-import fpt.sep.jlsf.service.UserServiceImpl;
 import fpt.sep.jlsf.util.EmailUtil;
 import fpt.sep.jlsf.util.OtpUtil;
 import jakarta.mail.MessagingException;
