@@ -5,8 +5,8 @@ import fpt.sep.jlsf.dto.RegisterDTO;
 import fpt.sep.jlsf.entity.User;
 import fpt.sep.jlsf.exception.AppException;
 import fpt.sep.jlsf.repository.UserRepository;
-import fpt.sep.jlsf.util.EmailUtil;
-import fpt.sep.jlsf.util.OtpUtil;
+import fpt.sep.jlsf.utils.EmailUtils;
+import fpt.sep.jlsf.utils.OtpUtils;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +28,9 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private EmailUtil emailUtil;
+    private EmailUtils emailUtils;
     @Mock
-    private OtpUtil otpUtil;
+    private OtpUtils otpUtils;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -38,11 +38,11 @@ class UserServiceImplTest {
     @Test
     void register_shouldSaveUserAndSendEmail() throws MessagingException {
         RegisterDTO dto = new RegisterDTO("phan", "email@example.com", "123456");
-        when(otpUtil.generateOTP()).thenReturn("123456");
+        when(otpUtils.generateOTP()).thenReturn("123456");
 
         userService.register(dto);
 
-        verify(emailUtil).sendOtpEmail(dto.email(), "123456");
+        verify(emailUtils).sendOtpEmail(dto.email(), "123456");
         verify(userRepository).save(any(User.class));
     }
 

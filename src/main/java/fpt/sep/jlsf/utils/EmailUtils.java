@@ -1,4 +1,4 @@
-package fpt.sep.jlsf.util;
+package fpt.sep.jlsf.utils;
 
 import fpt.sep.jlsf.entity.VerifyToken;
 import jakarta.mail.MessagingException;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class EmailUtil {
+public class EmailUtils {
 
     private final JavaMailSender javaMailSender;
 

@@ -29,7 +29,7 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "pending_email", unique = true)
@@ -51,16 +51,15 @@ public class User implements UserDetails {
     private boolean emailVerified = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
+    @JoinTable(name = "user_authority",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
     private List<Authority> authorities;
 
-    // UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
-
-
 
 }
 

@@ -8,8 +8,8 @@ import fpt.sep.jlsf.exception.AppException;
 import fpt.sep.jlsf.repository.UserRepository;
 import fpt.sep.jlsf.repository.VerifyTokenRepository;
 import fpt.sep.jlsf.service.UserService;
-import fpt.sep.jlsf.util.EmailUtil;
-import fpt.sep.jlsf.util.OtpUtil;
+import fpt.sep.jlsf.utils.EmailUtils;
+import fpt.sep.jlsf.utils.OtpUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final VerifyTokenRepository verifyTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final OtpUtil otpUtil;
-    private final EmailUtil emailUtil;
+    private final OtpUtils otpUtils;
+    private final EmailUtils emailUtils;
 
     private static final Duration OTP_TTL = Duration.ofMinutes(10);
     private static final Duration OTP_THROTTLE = Duration.ofMinutes(1);
@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
         VerifyToken token = verifyTokenRepository.findTopByUserAndTypeOrderByRequestedTimeDesc(user, VerifyTokenType.RESET_PASSWORD)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
 
-        if (!otpUtil.validateOTP(token.getToken(), otp)) {
+        if (!otpUtils.validateOTP(token.getToken(), otp)) {
             throw new IllegalArgumentException("Invalid OTP");
         }
 
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
     private void createAndSendToken(User user, VerifyTokenType type) {
         verifyTokenRepository.deleteAllByUserAndType(user, type);
         LocalDateTime now = LocalDateTime.now();
-        String otp = otpUtil.generateOTP();
+        String otp = otpUtils.generateOTP();
         VerifyToken token = VerifyToken.builder()
                 .user(user)
                 .token(otp)
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
                 .expirationTime(now.plus(OTP_TTL))
                 .build();
         verifyTokenRepository.save(token);
-        emailUtil.sendEmailAsync(user.getEmail(), otp, type);
+        emailUtils.sendEmailAsync(user.getEmail(), otp, type);
     }
 
     @Override
