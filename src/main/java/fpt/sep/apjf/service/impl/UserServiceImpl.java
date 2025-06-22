@@ -74,12 +74,8 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(registerDTO.email())) {
             throw new IllegalArgumentException("Email đã tồn tại.");
         }
-        if (userRepository.existsByUsername(registerDTO.username())) {
-            throw new IllegalArgumentException("Username đã tồn tại.");
-        }
-
         User user = new User();
-        user.setUsername(registerDTO.username());
+        user.setUsername("new user");
         user.setPassword(passwordEncoder.encode(registerDTO.password()));
         user.setEmail(registerDTO.email());
         user.setAvatar("https://engineering.usask.ca/images/no_avatar.jpg");
