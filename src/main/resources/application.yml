@@ -1,3 +1,5 @@
+server:
+  port: 8081
 spring:
   application:
     name: AuthorizationService
@@ -43,9 +45,4 @@ spring:
             token-uri: https://www.googleapis.com/oauth2/v4/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: name
-#server:
-#  port: 8081
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka/
+

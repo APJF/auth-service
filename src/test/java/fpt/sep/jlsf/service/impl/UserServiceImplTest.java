@@ -1,12 +1,13 @@
 package fpt.sep.jlsf.service.impl;
 
-import fpt.sep.jlsf.dto.LoginDTO;
-import fpt.sep.jlsf.dto.RegisterDTO;
-import fpt.sep.jlsf.entity.User;
-import fpt.sep.jlsf.exception.AppException;
-import fpt.sep.jlsf.repository.UserRepository;
-import fpt.sep.jlsf.utils.EmailUtils;
-import fpt.sep.jlsf.utils.OtpUtils;
+import fpt.sep.apjf.dto.LoginDTO;
+import fpt.sep.apjf.dto.RegisterDTO;
+import fpt.sep.apjf.entity.User;
+import fpt.sep.apjf.exception.AppException;
+import fpt.sep.apjf.repository.UserRepository;
+import fpt.sep.apjf.service.impl.UserServiceImpl;
+import fpt.sep.apjf.utils.EmailUtils;
+import fpt.sep.apjf.utils.OtpUtils;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

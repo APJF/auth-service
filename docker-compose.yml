@@ -1,25 +1,12 @@
 services:
-  mysql:
-    container_name: mysql-container
-    image: 'mysql:latest'
-    env_file:
-      - .env
-    environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_ROOT_HOST=%
-    ports:
-      - "3306:3306"
-
   pgvector:
-    image: pgvector/pgvector:0.8.0-pg17
+    image: pgvector/pgvector:pg16
     container_name: pgvector-container
     environment:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+    restart: unless-stopped
     volumes:
       - pgvector-data:/var/lib/postgresql/data
     networks:

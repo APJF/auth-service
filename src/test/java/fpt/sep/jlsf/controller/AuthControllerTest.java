@@ -1,9 +1,10 @@
 package fpt.sep.jlsf.controller;
 
-import fpt.sep.jlsf.dto.ApiResponseDTO;
-import fpt.sep.jlsf.dto.LoginDTO;
-import fpt.sep.jlsf.dto.RegisterDTO;
-import fpt.sep.jlsf.service.UserService;
+import fpt.sep.apjf.controller.AuthController;
+import fpt.sep.apjf.dto.ApiResponseDTO;
+import fpt.sep.apjf.dto.LoginDTO;
+import fpt.sep.apjf.dto.RegisterDTO;
+import fpt.sep.apjf.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
