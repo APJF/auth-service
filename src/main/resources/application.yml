@@ -7,10 +7,9 @@ spring:
     jwtSecret: ${JWT_SECRET}
     jwtExpirationMs: ${JWT_EXPIRATION}
   datasource:
-    url: ${POSTGRES_URL}
-    username: ${POSTGRES_USERNAME}
-    password: ${POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    url: ${RENDER_URL}
+    username: ${RENDER_USERNAME}
+    password: ${RENDER_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
