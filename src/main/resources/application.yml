@@ -1,15 +1,20 @@
+server:
+  port: 8081
 spring:
   application:
-    name: capstone
-
+    name: AuthorizationService
+  app:
+    jwtSecret: ${JWT_SECRET}
+    jwtExpirationMs: ${JWT_EXPIRATION}
   datasource:
-    url: ${DB_URL}
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+    url: ${RENDER_URL}
+    username: ${RENDER_USERNAME}
+    password: ${RENDER_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   mail:
     host: smtp.gmail.com
     port: 587
@@ -39,10 +44,4 @@ spring:
             token-uri: https://www.googleapis.com/oauth2/v4/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: name
-  ai:
-    ollama:
-      base-url: http://localhost:11434
-      chat:
-        options:
-          model: deepseek-r1:7b
-          temperature: 0.7
+
