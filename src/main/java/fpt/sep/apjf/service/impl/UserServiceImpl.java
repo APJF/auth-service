@@ -3,10 +3,12 @@ package fpt.sep.apjf.service.impl;
 import fpt.sep.apjf.dto.LoginDTO;
 import fpt.sep.apjf.dto.LoginResponse;
 import fpt.sep.apjf.dto.RegisterDTO;
+import fpt.sep.apjf.entity.Authority;
 import fpt.sep.apjf.entity.User;
 import fpt.sep.apjf.entity.VerifyToken;
 import fpt.sep.apjf.entity.VerifyToken.VerifyTokenType;
 import fpt.sep.apjf.exception.AppException;
+import fpt.sep.apjf.repository.AuthorityRepository;
 import fpt.sep.apjf.repository.UserRepository;
 import fpt.sep.apjf.repository.VerifyTokenRepository;
 import fpt.sep.apjf.service.UserService;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,15 +37,15 @@ import java.util.Optional;
 @Primary
 public class UserServiceImpl implements UserService {
 
+    private static final Duration OTP_TTL = Duration.ofMinutes(10);
+    private static final Duration OTP_THROTTLE = Duration.ofMinutes(1);
     private final UserRepository userRepository;
     private final VerifyTokenRepository verifyTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final OtpUtils otpUtils;
     private final EmailUtils emailUtils;
     private final JwtUtils jwtUtils;
-
-    private static final Duration OTP_TTL = Duration.ofMinutes(10);
-    private static final Duration OTP_THROTTLE = Duration.ofMinutes(1);
+    private final AuthorityRepository authorityRepository;
 
     @Override
     @Transactional
@@ -74,8 +77,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(registerDTO.email())) {
             throw new IllegalArgumentException("Email đã tồn tại.");
         }
+        Authority userRole = authorityRepository.findByAuthority("ROLE_USER")
+                .orElseThrow();
         User user = new User();
         user.setUsername("new user");
+
+        user.setAuthorities(new ArrayList<>(List.of(userRole)));
         user.setPassword(passwordEncoder.encode(registerDTO.password()));
         user.setEmail(registerDTO.email());
         user.setAvatar("https://engineering.usask.ca/images/no_avatar.jpg");
