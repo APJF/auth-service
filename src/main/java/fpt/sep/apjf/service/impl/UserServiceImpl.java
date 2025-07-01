@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public LoginResponse login(LoginDTO loginDTO) {
 
-        // 1. Tìm user theo email (hoặc username tuỳ ý)
         User user = userRepository.findByEmail(loginDTO.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
@@ -68,7 +67,8 @@ public class UserServiceImpl implements UserService {
         return new LoginResponse(
                 user.getUsername(),      // hoặc user.getEmail() nếu muốn
                 roles,
-                jwtUtils.generateTokenFromUsername(user));
+                jwtUtils.generateTokenFromUsername(user),
+                user.getAvatar());
     }
 
     @Override
