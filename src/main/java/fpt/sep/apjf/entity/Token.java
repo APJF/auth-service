@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "verify_token")
+@Table(name = "token")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VerifyToken {
+public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +36,11 @@ public class VerifyToken {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 20)
-    private VerifyTokenType type;
+    private TokenType type;
 
-    public enum VerifyTokenType {
+    public enum TokenType {
         REGISTRATION,
         RESET_PASSWORD,
         VERIFY_EMAIL
     }
 }
-

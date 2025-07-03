@@ -1,6 +1,6 @@
 package fpt.sep.apjf.utils;
 
-import fpt.sep.apjf.entity.VerifyToken;
+import fpt.sep.apjf.entity.Token;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -43,33 +43,36 @@ public class EmailUtils {
     }
 
     @Async("taskExecutor")
-    public void sendEmailAsync(String email, String otp, VerifyToken.VerifyTokenType type) {
+    public void sendEmailAsync(String email, String otp, Token.TokenType type) {
         try {
             switch (type) {
                 case REGISTRATION:
                     sendOtpEmail(email, otp);
                     break;
                 case RESET_PASSWORD:
-                    sendSetPassword(email, otp);
-                    break;
-                case VERIFY_EMAIL:
-                    sendOtpEmail(email, otp);
+                    sendResetPasswordEmail(email, otp);
                     break;
                 default:
-                    sendOtpEmail(email, otp);
+                    log.warn("Loại token không được hỗ trợ: {}", type);
             }
         } catch (Exception e) {
-            log.error("Error sending {} email: {}", type, e.getMessage(), e);
+            log.error("Gửi email thất bại đến {}: {}", email, e.getMessage(), e);
         }
     }
 
-    public void sendOtpEmail(String email, String otp) throws MessagingException {
-        String linkTemplate = "http://localhost:8080/auth/verify-account?email=%s&otp=%s";
-        sendEmail(email, "Email Verification", getHtmlContent(email, otp, linkTemplate));
+    // Gửi email OTP cho đăng ký
+    private void sendOtpEmail(String email, String otp) throws MessagingException {
+        String subject = "Xác thực tài khoản";
+        String htmlContent = getHtmlContent(email, otp, "http://localhost:8080/auth/verify?email=%s&otp=%s");
+        sendEmail(email, subject, htmlContent);
+        log.info("Gửi email OTP thành công đến: {}", email);
     }
 
-    public void sendSetPassword(String email, String otp) throws MessagingException {
-        String linkTemplate = "http://localhost:8080/auth/reset-password?email=%s&otp=%s";
-        sendEmail(email, "Reset Password", getHtmlContent(email, otp, linkTemplate));
+    // Gửi email OTP cho reset password
+    private void sendResetPasswordEmail(String email, String otp) throws MessagingException {
+        String subject = "Đặt lại mật khẩu";
+        String htmlContent = getHtmlContent(email, otp, "http://localhost:8080/auth/reset-password?email=%s&otp=%s");
+        sendEmail(email, subject, htmlContent);
+        log.info("Gửi email đặt lại mật khẩu thành công đến: {}", email);
     }
 }

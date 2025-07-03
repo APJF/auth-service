@@ -6,13 +6,12 @@ import jakarta.validation.constraints.Size;
 
 public record RegisterDTO(
 
-        @NotBlank(message = "Email cannot left blank")
-        @Email(message = "Wrong email format")
+        @NotBlank(message = "Email không được để trống")
+        @Email(message = "Email không đúng định dạng")
         String email,
 
-        @NotBlank(message = "Password cannot left blank")
-        @Size(min = 6, message = "password must be at least 6 character")
+        @NotBlank(message = "Mật khẩu không được để trống")
+        @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
         String password
 ) {
 }
-

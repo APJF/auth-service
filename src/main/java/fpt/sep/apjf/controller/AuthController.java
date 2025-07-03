@@ -58,4 +58,5 @@ public class AuthController {
         userService.resetPassword(email, otp, newPassword);
         return new ResponseEntity<>(new ApiResponseDTO(true, "Password reset successfully"), HttpStatus.OK);
     }
+
 }
